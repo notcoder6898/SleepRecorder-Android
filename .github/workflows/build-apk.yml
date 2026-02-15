@@ -21,19 +21,43 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       
-    - name: Download Gradle
+    - name: Download and Setup Gradle
       run: |
         wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
         unzip -q gradle-8.2-bin.zip
-        sudo mv gradle-8.2 /opt/gradle
-        sudo ln -sf /opt/gradle/bin/gradle /usr/local/bin/gradle
+        export PATH=$PWD/gradle-8.2/bin:$PATH
         gradle --version
+        echo "PATH=$PWD/gradle-8.2/bin:$PATH" >> $GITHUB_ENV
         
-    - name: Build APK
+    - name: Check Project Structure
       run: |
-        gradle assembleRelease --no-daemon --offline=false --stacktrace
+        echo "=== Project Root ==="
+        ls -la
+        echo ""
+        echo "=== Settings File ==="
+        cat settings.gradle.kts
+        echo ""
+        echo "=== Properties File ==="
+        cat gradle.properties
+        
+    - name: Build APK with Debug
+      run: |
+        gradle assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build.log
+        BUILD_EXIT_CODE=${PIPESTATUS[0]}
+        if [ $BUILD_EXIT_CODE -ne 0 ]; then
+          echo "BUILD FAILED with exit code $BUILD_EXIT_CODE"
+          tail -100 build.log
+          exit $BUILD_EXIT_CODE
+        fi
       env:
         ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+
+    - name: Upload Build Log
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: build-logs
+        path: build.log
 
     - name: Check APK exists
       run: |
