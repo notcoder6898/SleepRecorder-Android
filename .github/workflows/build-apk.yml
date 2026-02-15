@@ -20,12 +20,24 @@ jobs:
         
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      
+    - name: Download Gradle
+      run: |
+        wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
+        unzip -q gradle-8.2-bin.zip
+        sudo mv gradle-8.2 /opt/gradle
+        sudo ln -sf /opt/gradle/bin/gradle /usr/local/bin/gradle
+        gradle --version
         
-    - name: Build with Gradle
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: '8.2'
-        arguments: assembleRelease
+    - name: Build APK
+      run: |
+        gradle assembleRelease --no-daemon --offline=false --stacktrace
+      env:
+        ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+
+    - name: Check APK exists
+      run: |
+        ls -la app/build/outputs/apk/release/
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
