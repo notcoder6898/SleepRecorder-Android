@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">睡眠监测</string>
+    
+    <!-- 权限说明 -->
+    <string name="permission_record_audio_title">需要录音权限</string>
+    <string name="permission_record_audio_message">睡眠监测需要录音权限来分析夜间声音（鼾声、梦话等）。录音仅保存在本地。</string>
+    
+    <!-- 通知 -->
+    <string name="notification_channel_name">睡眠监测</string>
+    <string name="notification_channel_description">后台录音服务通知</string>
+    <string name="notification_recording_title">睡眠监测中</string>
+    <string name="notification_recording_content">正在监听夜间声音...</string>
+</resources>
